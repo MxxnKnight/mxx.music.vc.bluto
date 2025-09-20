@@ -82,3 +82,6 @@ VIDEO_STREAM_LIMIT = int(getenv("VIDEO_STREAM_LIMIT", "60")) # In minutes
 
 # Pyrogram Session
 SESSION_NAME = getenv("SESSION_NAME", "Bluto")
+
+# Force Subscribe Channel
+FORCE_SUB_CHANNEL = getenv("FORCE_SUB_CHANNEL", "")

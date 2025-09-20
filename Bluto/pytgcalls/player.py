@@ -143,10 +143,13 @@ class BlutoPlayer:
         """Get the queue for a chat."""
         return self._groups.get(chat_id, {}).get("queue", [])
 
-    def add_to_queue(self, chat_id: int, song_details: dict):
+    def add_to_queue(self, chat_id: int, song_details: dict, at_front: bool = False):
         """Add a song to the queue."""
         if chat_id in self._groups:
-            self._groups[chat_id]["queue"].append(song_details)
+            if at_front:
+                self._groups[chat_id]["queue"].insert(0, song_details)
+            else:
+                self._groups[chat_id]["queue"].append(song_details)
             return "added_to_queue"
         return "not_in_vc"
 

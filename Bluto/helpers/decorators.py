@@ -33,6 +33,8 @@ from pyrogram.types import Message
 from pyrogram import Client
 
 from Bluto.config import OWNER_ID, SUDO_USERS
+from Bluto.helpers.database import is_user_banned
+
 
 def owner_only(func):
     @wraps(func)
@@ -42,10 +44,11 @@ def owner_only(func):
         return await func(client, message)
     return wrapper
 
+
 def admin_only(func):
     @wraps(func)
     async def wrapper(client: Client, message: Message):
-        if message.from_user.id in SUDO_USERS:
+        if message.from_user.id in SUDO_USERS or message.from_user.id == OWNER_ID:
             return await func(client, message)
 
         chat_member = await client.get_chat_member(
@@ -53,5 +56,45 @@ def admin_only(func):
         )
         if chat_member.status not in ["administrator", "creator"]:
             return await message.reply_text("You are not an admin.")
+        return await func(client, message)
+    return wrapper
+
+
+def is_banned(func):
+    @wraps(func)
+    async def wrapper(client: Client, message: Message):
+        if await is_user_banned(message.from_user.id):
+            return await message.reply_text("You are banned from using this bot.")
+        return await func(client, message)
+    return wrapper
+
+
+def force_subscribe(func):
+    @wraps(func)
+    async def wrapper(client: Client, message: Message):
+        from Bluto.config import FORCE_SUB_CHANNEL
+        if not FORCE_SUB_CHANNEL:
+            return await func(client, message)
+        try:
+            member = await client.get_chat_member(FORCE_SUB_CHANNEL, message.from_user.id)
+            if member.status in ["kicked", "left"]:
+                await message.reply_text(
+                    "You must join my updates channel to use me.",
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    "Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}"
+                                )
+                            ]
+                        ]
+                    ),
+                )
+                return
+        except Exception:
+            await message.reply_text(
+                "Something went wrong. Make sure I am an admin in the force subscribe channel."
+            )
+            return
         return await func(client, message)
     return wrapper

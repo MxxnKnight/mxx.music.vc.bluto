@@ -4,11 +4,13 @@ A Telegram VC Music Bot to play music in your group's voice chat.
 
 ## Features
 
-- **Play from YouTube:** Play any song from YouTube by providing a link or by searching for the song name.
+- **Play from YouTube, Spotify, and YouTube Music:** Play any song from YouTube, Spotify, or YouTube Music by providing a link or by searching for the song name.
 - **Queue System:** Add multiple songs to a queue. The bot will automatically play the next song when the current one finishes.
-- **Player Controls:** Pause, resume, skip, and stop the music.
-- **Admin Controls:** Only admins can control the music player.
+- **Inline Player Controls:** Pause, resume, skip, and stop the music using inline buttons.
+- **Admin Controls:** Admins can play music directly, stop playback, ban/unban users, and warn users.
 - **"Now Playing" Thumbnail:** The bot sends a beautiful thumbnail with the song details when a song starts playing.
+- **Force Subscribe:** Require users to join a channel before using the bot in private messages.
+- **Logging:** Log all music playback and admin actions to a designated log channel.
 - **Docker Support:** Easy to deploy using Docker.
 
 ## Deployment
@@ -20,6 +22,7 @@ A Telegram VC Music Bot to play music in your group's voice chat.
 3.  **MONGO_DB_URI:** A MongoDB database URI. You can get one from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 4.  **OWNER_ID:** Your Telegram user ID. Get it from [@FallenIdsBot](https://t.me/FallenIdsBot).
 5.  **LOG_GROUP_ID:** A private group ID for the bot to send logs.
+6.  **FORCE_SUB_CHANNEL:** The username of the channel that users must join to use the bot (optional).
 
 ### Configuration
 
@@ -36,6 +39,7 @@ SUDO_USERS=
 BOT_USERNAME= # Your bot's username without the @
 SUPPORT_CHANNEL= # Your support channel link
 SUPPORT_GROUP= # Your support group link
+FORCE_SUB_CHANNEL= # The username of the force subscribe channel (without the @)
 ```
 
 ### Deploy with Docker
@@ -74,14 +78,23 @@ SUPPORT_GROUP= # Your support group link
 
 ## Commands
 
-- `/play <song name or youtube link>`: Plays a song.
+### User Commands
+- `/start`: Starts the bot and shows the main menu.
+- `/play <song name or link>`: Plays a song from YouTube, Spotify, or YouTube Music.
+- `/queue`: Shows the list of songs in the queue.
+
+### Admin Commands
+- `/playnow <song name or link>`: Plays a song immediately, without adding it to the queue.
 - `/pause`: Pauses the music.
 - `/resume`: Resumes the music.
 - `/skip`: Skips the current song.
 - `/end` or `/stop`: Stops the music and leaves the voice chat.
-- `/queue`: Shows the list of songs in the queue.
 - `/clearqueue`: Clears the queue.
 - `/shuffle`: Shuffles the queue.
+- `/ban <user>`: Bans a user from using the bot.
+- `/unban <user>`: Unbans a user.
+- `/warn <user>`: Warns a user.
+
 
 ## Credits
 

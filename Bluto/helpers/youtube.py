@@ -41,11 +41,26 @@ def search(query: str, limit: int = 10):
         return []
 
 def get_video_info(url: str):
-    """Get video information from a YouTube URL."""
+    """Get video information from a URL."""
+    if "open.spotify.com" in url:
+        ydl_opts = {
+            'noplaylist': True,
+            'quiet': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            try:
+                info = ydl.extract_info(url, download=False)
+                query = f"{info['artist']} - {info['track']}"
+                return get_video_info(query)
+            except Exception as e:
+                print(f"Failed to get Spotify info: {e}")
+                return None
+
     ydl_opts = {
         'format': 'bestaudio[ext=m4a]/bestaudio/best',
         'noplaylist': True,
         'quiet': True,
+        'default_search': 'ytsearch',
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
