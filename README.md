@@ -81,7 +81,7 @@ FORCE_SUB_CHANNEL= # The username of the force subscribe channel (without the @)
 ### User Commands
 - `/start`: Starts the bot and shows the main menu.
 - `/play <song name or link>`: Plays a song from YouTube, Spotify, or YouTube Music.
-- `/song <song name or link>`: Downloads a song from YouTube, Spotify, or YouTube Music.
+- `/song <song name or link>`: Downloads a song. In groups with the feature enabled, it provides a private link to get the song.
 - `/queue`: Shows the list of songs in the queue.
 
 ### Admin Commands
@@ -95,6 +95,10 @@ FORCE_SUB_CHANNEL= # The username of the force subscribe channel (without the @)
 - `/ban <user>`: Bans a user from using the bot.
 - `/unban <user>`: Unbans a user.
 - `/warn <user>`: Warns a user.
+
+### Owner Commands
+- `/enablesong`: Enables the advanced song download feature for the current group.
+- `/disablesong`: Disables the advanced song download feature for the current group.
 
 
 ## Credits

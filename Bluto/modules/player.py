@@ -207,7 +207,9 @@ async def pause_command(client: Client, message: Message):
         await message.reply_text("Nothing is playing.")
     else:
         await message.reply_text("Paused playback.")
-        await message.edit_reply_markup(get_playback_keyboard(True))
+        # This will only work if the message is a reply to the bot's "now playing" message
+        if message.reply_to_message and message.reply_to_message.from_user.is_self:
+            await message.reply_to_message.edit_reply_markup(get_playback_keyboard(True))
 
 
 @app.on_message(filters.command(["resume", f"resume@{BOT_USERNAME}"]))
@@ -220,7 +222,9 @@ async def resume_command(client: Client, message: Message):
         await message.reply_text("Nothing is paused.")
     else:
         await message.reply_text("Resumed playback.")
-        await message.edit_reply_markup(get_playback_keyboard(False))
+        # This will only work if the message is a reply to the bot's "now playing" message
+        if message.reply_to_message and message.reply_to_message.from_user.is_self:
+            await message.reply_to_message.edit_reply_markup(get_playback_keyboard(False))
 
 
 @app.on_message(filters.command(["skip", f"skip@{BOT_USERNAME}"]))

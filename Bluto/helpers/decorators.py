@@ -48,7 +48,7 @@ def owner_only(func):
 def admin_only(func):
     @wraps(func)
     async def wrapper(client: Client, message: Message):
-        if message.from_user.id in SUDO_USERS or message.from_user.id == OWNER_ID:
+        if message.from_user.id in SUDO_USERS:
             return await func(client, message)
 
         chat_member = await client.get_chat_member(

@@ -43,7 +43,6 @@ from Bluto.config import (
     SUPPORT_CHANNEL,
     SUPPORT_GROUP,
 )
-from Bluto.helpers.decorators import force_subscribe
 
 # Constants for callback data
 ABOUT_CALLBACK = "about"
@@ -87,7 +86,6 @@ help_keyboard = InlineKeyboardMarkup(
 
 
 @app.on_message(filters.command(["start", f"start@{BOT_USERNAME}"]))
-@force_subscribe
 async def start_command(client: Client, message: Message):
     """Handle the /start command."""
     if message.chat.type == "private":
