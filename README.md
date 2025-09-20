@@ -81,6 +81,7 @@ FORCE_SUB_CHANNEL= # The username of the force subscribe channel (without the @)
 ### User Commands
 - `/start`: Starts the bot and shows the main menu.
 - `/play <song name or link>`: Plays a song from YouTube, Spotify, or YouTube Music.
+- `/song <song name or link>`: Downloads a song from YouTube, Spotify, or YouTube Music.
 - `/queue`: Shows the list of songs in the queue.
 
 ### Admin Commands

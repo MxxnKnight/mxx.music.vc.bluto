@@ -85,3 +85,6 @@ SESSION_NAME = getenv("SESSION_NAME", "Bluto")
 
 # Force Subscribe Channel
 FORCE_SUB_CHANNEL = getenv("FORCE_SUB_CHANNEL", "")
+
+# Audio Format
+AUDIO_FORMAT = getenv("AUDIO_FORMAT", "mp3")
