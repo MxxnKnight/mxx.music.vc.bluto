@@ -69,7 +69,6 @@ async def is_song_download_enabled(chat_id: int) -> bool:
     chat = await song_download_collection.find_one({"chat_id": chat_id})
     return chat.get("enabled", False)
 
-
 async def create_song_request(
     request_id: str, user_id: int, query: str, chat_id: int, message_id: int
 ):
@@ -84,11 +83,9 @@ async def create_song_request(
         }
     )
 
-
 async def get_song_request(request_id: str):
     """Get a song request."""
     return await song_requests_collection.find_one({"request_id": request_id})
-
 
 async def delete_song_request(request_id: str):
     """Delete a song request."""

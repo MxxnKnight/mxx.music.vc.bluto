@@ -37,7 +37,7 @@ from pyrogram.types import (
 )
 
 from Bluto.bot import app
-from Bluto.config import BOT_USERNAME, LOG_GROUP_ID
+from Bluto.config import BOT_USERNAME, LOG_GROUP_ID, LOG_TOPIC_ID
 from Bluto.pytgcalls.player import bluto_player
 from Bluto.helpers.youtube import search, get_video_info
 from Bluto.helpers.thumbnail import generate_thumbnail
@@ -113,6 +113,7 @@ async def play_command(client: Client, message: Message):
             f"**Username:** @{message.from_user.username}\n"
             f"**User ID:** `{message.from_user.id}`\n"
             f"**Song:** {video_info['title']}",
+            message_thread_id=LOG_TOPIC_ID,
         )
 
         # Generate and send thumbnail
@@ -175,6 +176,7 @@ async def playnow_command(client: Client, message: Message):
         f"**Username:** @{message.from_user.username}\n"
         f"**User ID:** `{message.from_user.id}`\n"
         f"**Song:** {video_info['title']}",
+        message_thread_id=LOG_TOPIC_ID,
     )
 
     # Generate and send thumbnail
@@ -229,7 +231,6 @@ async def resume_command(client: Client, message: Message):
 
 @app.on_message(filters.command(["skip", f"skip@{BOT_USERNAME}"]))
 @admin_only
-@is_banned
 async def skip_command(client: Client, message: Message):
     """Handle the /skip command."""
     if not bluto_player.get_queue(message.chat.id):
@@ -241,7 +242,6 @@ async def skip_command(client: Client, message: Message):
 
 @app.on_message(filters.command(["end", "stop", f"end@{BOT_USERNAME}", f"stop@{BOT_USERNAME}"]))
 @admin_only
-@is_banned
 async def end_command(client: Client, message: Message):
     """Handle the /end and /stop commands."""
     await bluto_player.stop(message.chat.id)
@@ -250,7 +250,6 @@ async def end_command(client: Client, message: Message):
 
 
 @app.on_message(filters.command(["queue", f"queue@{BOT_USERNAME}"]))
-@is_banned
 async def queue_command(client: Client, message: Message):
     """Handle the /queue command."""
     queue = bluto_player.get_queue(message.chat.id)
@@ -263,7 +262,6 @@ async def queue_command(client: Client, message: Message):
 
 @app.on_message(filters.command(["clearqueue", f"clearqueue@{BOT_USERNAME}"]))
 @admin_only
-@is_banned
 async def clear_queue_command(client: Client, message: Message):
     """Handle the /clearqueue command."""
     result = bluto_player.clear_queue(message.chat.id)

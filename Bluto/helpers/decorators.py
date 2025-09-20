@@ -33,8 +33,6 @@ from pyrogram.types import Message
 from pyrogram import Client
 
 from Bluto.config import OWNER_ID, SUDO_USERS
-from Bluto.helpers.database import is_user_banned
-
 
 def owner_only(func):
     @wraps(func)
@@ -44,6 +42,9 @@ def owner_only(func):
         return await func(client, message)
     return wrapper
 
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from Bluto.config import FORCE_SUB_CHANNEL
+from Bluto.helpers.database import is_user_banned
 
 def admin_only(func):
     @wraps(func)
@@ -72,7 +73,6 @@ def is_banned(func):
 def force_subscribe(func):
     @wraps(func)
     async def wrapper(client: Client, message: Message):
-        from Bluto.config import FORCE_SUB_CHANNEL
         if not FORCE_SUB_CHANNEL:
             return await func(client, message)
         try:

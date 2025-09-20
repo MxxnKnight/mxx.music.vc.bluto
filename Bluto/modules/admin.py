@@ -32,7 +32,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 
 from Bluto.bot import app
-from Bluto.config import LOG_GROUP_ID
+from Bluto.config import LOG_GROUP_ID, LOG_TOPIC_ID
 from Bluto.helpers.decorators import admin_only
 from Bluto.helpers.database import ban_user as ban_user_db, unban_user as unban_user_db
 
@@ -74,6 +74,7 @@ async def warn_user(client: Client, message: Message):
             f"**Admin:** {message.from_user.mention}\n"
             f"**User:** {user_to_warn.mention}\n"
             f"**User ID:** `{user_to_warn.id}`",
+            message_thread_id=LOG_TOPIC_ID,
         )
     except Exception as e:
         await message.reply_text(f"Failed to send warning: {e}")
@@ -95,6 +96,7 @@ async def ban_user(client: Client, message: Message):
         f"**Admin:** {message.from_user.mention}\n"
         f"**User:** {user_to_ban.mention}\n"
         f"**User ID:** `{user_to_ban.id}`",
+        message_thread_id=LOG_TOPIC_ID,
     )
 
 
@@ -114,4 +116,5 @@ async def unban_user(client: Client, message: Message):
         f"**Admin:** {message.from_user.mention}\n"
         f"**User:** {user_to_unban.mention}\n"
         f"**User ID:** `{user_to_unban.id}`",
+        message_thread_id=LOG_TOPIC_ID,
     )

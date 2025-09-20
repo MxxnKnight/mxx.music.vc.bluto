@@ -123,19 +123,24 @@ async def help_page(client: Client, callback_query: CallbackQuery):
     """Display the help page."""
     await callback_query.message.edit_text(
         "**Bluto Music Bot Help**\n\n"
-        "Here are the available commands:\n\n"
-        "**/play <song name or link>** - Plays a song.\n"
+        "**User Commands:**\n"
+        "**/play <song name or link>** - Plays a song from YouTube, Spotify, or YouTube Music.\n"
+        "**/song <song name or link>** - Downloads a song. In groups with the feature enabled, it provides a private link to get the song.\n"
+        "**/queue** - Shows the list of songs in the queue.\n\n"
+        "**Admin Commands:**\n"
+        "**/playnow <song name or link>** - Plays a song immediately, without adding it to the queue.\n"
         "**/pause** - Pauses the music.\n"
         "**/resume** - Resumes the music.\n"
         "**/skip** - Skips the current song.\n"
         "**/end** or **/stop** - Stops the music and leaves the voice chat.\n"
-        "**/queue** - Shows the list of songs in the queue.\n"
         "**/clearqueue** - Clears the queue.\n"
-        "**/shuffle** - Shuffles the queue.\n\n"
-        "**Admin Commands:**\n"
+        "**/shuffle** - Shuffles the queue.\n"
         "**/ban <user>** - Bans a user from using the bot.\n"
         "**/unban <user>** - Unbans a user.\n"
-        "**/warn <user>** - Warns a user.\n",
+        "**/warn <user>** - Warns a user.\n\n"
+        "**Owner Commands:**\n"
+        "**/enablesong** - Enables the advanced song download feature for the current group.\n"
+        "**/disablesong** - Disables the advanced song download feature for the current group.\n",
         reply_markup=help_keyboard,
     )
 
