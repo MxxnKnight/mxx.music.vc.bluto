@@ -48,16 +48,27 @@ from Bluto.helpers.database import is_user_banned
 
 def admin_only(func):
     @wraps(func)
-    async def wrapper(client: Client, message: Message):
-        if message.from_user.id in SUDO_USERS:
-            return await func(client, message)
+    async def wrapper(client: Client, update):
+        if isinstance(update, Message):
+            user = update.from_user
+            chat_id = update.chat.id
+        elif isinstance(update, CallbackQuery):
+            user = update.from_user
+            chat_id = update.message.chat.id
+        else:
+            return
 
-        chat_member = await client.get_chat_member(
-            chat_id=message.chat.id, user_id=message.from_user.id
-        )
+        if user.id in SUDO_USERS:
+            return await func(client, update)
+
+        chat_member = await client.get_chat_member(chat_id=chat_id, user_id=user.id)
         if chat_member.status not in ["administrator", "creator"]:
-            return await message.reply_text("You are not an admin.")
-        return await func(client, message)
+            if isinstance(update, Message):
+                await update.reply_text("You are not an admin.")
+            elif isinstance(update, CallbackQuery):
+                await update.answer("You are not an admin.", show_alert=True)
+            return
+        return await func(client, update)
     return wrapper
 
 

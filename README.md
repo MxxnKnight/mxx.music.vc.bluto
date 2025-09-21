@@ -100,10 +100,7 @@ AUDIO_FORMAT= # The audio format for downloaded songs (e.g., mp3, m4a, flac), de
 - `/ban <user>`: Bans a user from using the bot.
 - `/unban <user>`: Unbans a user.
 - `/warn <user>`: Warns a user.
-
-### Owner Commands
-- `/enablesong`: Enables the advanced song download feature for the current group.
-- `/disablesong`: Disables the advanced song download feature for the current group.
+- `/songstatus <group_id>`: Enables or disables the advanced song download feature for a group.
 
 
 ## Credits

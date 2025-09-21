@@ -29,12 +29,18 @@
 # along with Bluto. If not, see <https://www.gnu.org/licenses/>.
 
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 from Bluto.bot import app
 from Bluto.config import LOG_GROUP_ID, LOG_TOPIC_ID
 from Bluto.helpers.decorators import admin_only
-from Bluto.helpers.database import ban_user as ban_user_db, unban_user as unban_user_db
+from Bluto.helpers.database import (
+    ban_user as ban_user_db,
+    unban_user as unban_user_db,
+    is_song_download_enabled,
+    enable_song_download,
+    disable_song_download,
+)
 
 
 async def get_user_from_message(message: Message):
@@ -118,3 +124,57 @@ async def unban_user(client: Client, message: Message):
         f"**User ID:** `{user_to_unban.id}`",
         message_thread_id=LOG_TOPIC_ID,
     )
+
+
+@app.on_message(filters.command("songstatus") & filters.private)
+@admin_only
+async def song_status(client: Client, message: Message):
+    """Get the song download status for a chat."""
+    if len(message.command) < 2:
+        return await message.reply_text("Please provide a chat ID.")
+
+    chat_id = int(message.command[1])
+    is_enabled = await is_song_download_enabled(chat_id)
+    status = "Enabled" if is_enabled else "Disabled"
+
+    await message.reply_text(
+        f"**Song Download Status for {chat_id}**\n\n" f"**Status:** {status}",
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        text="Enable", callback_data=f"enablesong_{chat_id}"
+                    ),
+                    InlineKeyboardButton(
+                        text="Disable", callback_data=f"disablesong_{chat_id}"
+                    ),
+                ]
+            ]
+        ),
+    )
+
+
+@app.on_callback_query(filters.regex("^enablesong_"))
+@admin_only
+async def enable_song_callback(client: Client, callback_query: CallbackQuery):
+    """Handle the enable song callback query."""
+    chat_id = int(callback_query.data.split("_")[1])
+    await enable_song_download(chat_id)
+    await callback_query.message.edit_text(
+        f"**Song Download Status for {chat_id}**\n\n" f"**Status:** Enabled",
+        reply_markup=callback_query.message.reply_markup,
+    )
+    await callback_query.answer("Song download enabled.")
+
+
+@app.on_callback_query(filters.regex("^disablesong_"))
+@admin_only
+async def disable_song_callback(client: Client, callback_query: CallbackQuery):
+    """Handle the disable song callback query."""
+    chat_id = int(callback_query.data.split("_")[1])
+    await disable_song_download(chat_id)
+    await callback_query.message.edit_text(
+        f"**Song Download Status for {chat_id}**\n\n" f"**Status:** Disabled",
+        reply_markup=callback_query.message.reply_markup,
+    )
+    await callback_query.answer("Song download disabled.")

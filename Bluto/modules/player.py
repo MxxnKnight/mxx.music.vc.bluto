@@ -118,12 +118,17 @@ async def play_command(client: Client, message: Message):
 
         # Generate and send thumbnail
         thumbnail_path = generate_thumbnail(
-            video_info["title"], video_info["thumbnail"], video_info["duration"], 0
+            video_info["title"],
+            video_info["thumbnail"],
+            video_info["duration"],
+            message.from_user.first_name,
         )
         if thumbnail_path:
             await message.reply_photo(
                 photo=thumbnail_path,
-                caption=f"Now playing: {video_info['title']}",
+                caption=f"[{video_info['title']}]({video_info['url']})\n\n"
+                f"**Duration:** {video_info['duration'] // 60}:{video_info['duration'] % 60:02d}\n"
+                f"**Requested by:** {message.from_user.mention}",
                 reply_markup=get_playback_keyboard(False),
             )
             import os
@@ -131,7 +136,9 @@ async def play_command(client: Client, message: Message):
             os.remove(thumbnail_path)
         else:
             await message.reply_text(
-                f"Now playing: {video_info['title']}",
+                f"[{video_info['title']}]({video_info['url']})\n\n"
+                f"**Duration:** {video_info['duration'] // 60}:{video_info['duration'] % 60:02d}\n"
+                f"**Requested by:** {message.from_user.mention}",
                 reply_markup=get_playback_keyboard(False),
             )
     else:
@@ -181,12 +188,17 @@ async def playnow_command(client: Client, message: Message):
 
     # Generate and send thumbnail
     thumbnail_path = generate_thumbnail(
-        video_info["title"], video_info["thumbnail"], video_info["duration"], 0
+        video_info["title"],
+        video_info["thumbnail"],
+        video_info["duration"],
+        message.from_user.first_name,
     )
     if thumbnail_path:
         await message.reply_photo(
             photo=thumbnail_path,
-            caption=f"Now playing: {video_info['title']}",
+            caption=f"[{video_info['title']}]({video_info['url']})\n\n"
+            f"**Duration:** {video_info['duration'] // 60}:{video_info['duration'] % 60:02d}\n"
+            f"**Requested by:** {message.from_user.mention}",
             reply_markup=get_playback_keyboard(False),
         )
         import os
@@ -194,7 +206,9 @@ async def playnow_command(client: Client, message: Message):
         os.remove(thumbnail_path)
     else:
         await message.reply_text(
-            f"Now playing: {video_info['title']}",
+            f"[{video_info['title']}]({video_info['url']})\n\n"
+            f"**Duration:** {video_info['duration'] // 60}:{video_info['duration'] % 60:02d}\n"
+            f"**Requested by:** {message.from_user.mention}",
             reply_markup=get_playback_keyboard(False),
         )
 

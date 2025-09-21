@@ -137,10 +137,8 @@ async def help_page(client: Client, callback_query: CallbackQuery):
         "**/shuffle** - Shuffles the queue.\n"
         "**/ban <user>** - Bans a user from using the bot.\n"
         "**/unban <user>** - Unbans a user.\n"
-        "**/warn <user>** - Warns a user.\n\n"
-        "**Owner Commands:**\n"
-        "**/enablesong** - Enables the advanced song download feature for the current group.\n"
-        "**/disablesong** - Disables the advanced song download feature for the current group.\n",
+        "**/warn <user>** - Warns a user.\n"
+        "**/songstatus <group_id>** - Enables or disables the advanced song download feature for a group.\n",
         reply_markup=help_keyboard,
     )
 

@@ -33,7 +33,7 @@ import requests
 from io import BytesIO
 import os
 
-def generate_thumbnail(title: str, thumbnail_url: str, duration: int, current_time: int):
+def generate_thumbnail(title: str, thumbnail_url: str, duration: int, requested_by: str):
     """Generate a 'Now Playing' thumbnail."""
     try:
         # Create thumbnails directory if it doesn't exist
@@ -42,28 +42,33 @@ def generate_thumbnail(title: str, thumbnail_url: str, duration: int, current_ti
 
         # Download and open the thumbnail
         response = requests.get(thumbnail_url)
-        img = Image.open(BytesIO(response.content))
+        img = Image.open(BytesIO(response.content)).convert("RGBA")
 
         # Create a drawing context
         draw = ImageDraw.Draw(img)
 
         # Font (assuming a font file is available)
         try:
-            font = ImageFont.truetype("assets/font.ttf", 30)
+            font = ImageFont.truetype("assets/font.ttf", 24)
+            title_font = ImageFont.truetype("assets/font.ttf", 30)
         except IOError:
             font = ImageFont.load_default()
+            title_font = ImageFont.load_default()
+
+        # Add a semi-transparent overlay
+        overlay = Image.new("RGBA", img.size, (0, 0, 0, 128))
+        img = Image.alpha_composite(img, overlay)
+        draw = ImageDraw.Draw(img)
 
         # Add title
-        draw.text((10, 10), title, font=font, fill="white")
+        draw.text((20, 20), title, font=title_font, fill="white")
 
-        # Add bot name
-        draw.text((10, img.height - 40), "Bluto Music", font=font, fill="white")
+        # Add duration
+        duration_str = f"{duration // 60}:{duration % 60:02d}"
+        draw.text((20, img.height - 60), f"Duration: {duration_str}", font=font, fill="white")
 
-        # Seek bar
-        bar_width = img.width - 20
-        progress = (current_time / duration) * bar_width
-        draw.rectangle([10, img.height - 15, 10 + bar_width, img.height - 10], fill="gray")
-        draw.rectangle([10, img.height - 15, 10 + progress, img.height - 10], fill="white")
+        # Add requested by
+        draw.text((20, img.height - 90), f"Requested by: {requested_by}", font=font, fill="white")
 
         # Save the image
         path = f"thumbnails/thumb_{title}.png"
