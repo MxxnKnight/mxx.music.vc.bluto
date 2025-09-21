@@ -30,7 +30,8 @@
 
 aiohttp
 better_exceptions
-motor
+asyncpg
+psycopg2-binary
 pillow
 psutil
 pyrogram

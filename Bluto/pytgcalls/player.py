@@ -48,6 +48,13 @@ from Bluto.config import (
     VIDEO_STREAM_LIMIT,
 )
 from Bluto.logging import LOGGER
+from Bluto.helpers.database import (
+    add_to_queue,
+    get_queue,
+    get_next_song,
+    clear_queue,
+    shuffle_queue,
+)
 
 class BlutoPlayer:
     def __init__(self):
@@ -57,11 +64,11 @@ class BlutoPlayer:
         """Callback function to handle stream updates."""
         if isinstance(stream, Update.StreamEnded):
             LOGGER(__name__).info(f"Stream ended in chat {chat_id}")
-            if self._groups[chat_id]["queue"]:
-                next_song = self._groups[chat_id]["queue"].pop(0)
-                await self.play(chat_id, next_song["url"], is_video=next_song["is_video"])
+            next_song = await get_next_song(chat_id)
+            if next_song:
+                await self.play(chat_id, next_song["song_details"]["url"], is_video=next_song["song_details"]["is_video"])
                 try:
-                    await app.send_message(chat_id, f"Now playing: {next_song['title']}")
+                    await app.send_message(chat_id, f"Now playing: {next_song['song_details']['title']}")
                 except Exception as e:
                     LOGGER(__name__).error(f"Failed to send message: {e}")
             else:
@@ -76,7 +83,6 @@ class BlutoPlayer:
         self._groups[chat_id] = {
             "user_id": user_id,
             "status": "inactive",
-            "queue": [],
         }
         await pytgcalls.join_group_call(
             chat_id,
@@ -139,31 +145,24 @@ class BlutoPlayer:
         self._groups[chat_id]["status"] = "inactive"
         LOGGER(__name__).info(f"Stopped playback in chat {chat_id}")
 
-    def get_queue(self, chat_id: int):
+    async def get_queue(self, chat_id: int):
         """Get the queue for a chat."""
-        return self._groups.get(chat_id, {}).get("queue", [])
+        return await get_queue(chat_id)
 
-    def add_to_queue(self, chat_id: int, song_details: dict):
+    async def add_to_queue(self, chat_id: int, song_details: dict, at_front: bool = False):
         """Add a song to the queue."""
-        if chat_id in self._groups:
-            self._groups[chat_id]["queue"].append(song_details)
-            return "added_to_queue"
-        return "not_in_vc"
+        await add_to_queue(chat_id, song_details, at_front)
+        return "added_to_queue"
 
-    def clear_queue(self, chat_id: int):
+    async def clear_queue(self, chat_id: int):
         """Clear the queue for a chat."""
-        if chat_id in self._groups:
-            self._groups[chat_id]["queue"].clear()
-            return "queue_cleared"
-        return "not_in_vc"
+        await clear_queue(chat_id)
+        return "queue_cleared"
 
-    def shuffle_queue(self, chat_id: int):
+    async def shuffle_queue(self, chat_id: int):
         """Shuffle the queue for a chat."""
-        if chat_id in self._groups and self._groups[chat_id]["queue"]:
-            import random
-            random.shuffle(self._groups[chat_id]["queue"])
-            return "queue_shuffled"
-        return "queue_empty"
+        await shuffle_queue(chat_id)
+        return "queue_shuffled"
 
 bluto_player = BlutoPlayer()
 pytgcalls.on_stream_end()(bluto_player._update_stream)

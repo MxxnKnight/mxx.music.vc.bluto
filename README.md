@@ -21,7 +21,7 @@ A Telegram VC Music Bot to play music in your group's voice chat.
 
 1.  **API_ID and API_HASH:** Get these from [my.telegram.org](https://my.telegram.org).
 2.  **BOT_TOKEN:** Get this from [@BotFather](https://t.me/BotFather) on Telegram.
-3.  **MONGO_DB_URI:** A MongoDB database URI. You can get one from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+3.  **DATABASE_URL:** Your PostgreSQL database URL.
 4.  **OWNER_ID:** Your Telegram user ID. Get it from [@FallenIdsBot](https://t.me/FallenIdsBot).
 5.  **LOG_GROUP_ID:** A private group ID for the bot to send logs.
 6.  **LOG_TOPIC_ID:** The ID of the topic in the log group to send logs to (optional).
@@ -35,7 +35,7 @@ Create a `.env` file with the following variables:
 API_ID=
 API_HASH=
 BOT_TOKEN=
-MONGO_DB_URI=
+DATABASE_URL=
 OWNER_ID=
 LOG_GROUP_ID=
 LOG_TOPIC_ID=

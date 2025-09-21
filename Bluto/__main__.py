@@ -31,10 +31,12 @@
 import asyncio
 from Bluto.bot import main
 from Bluto.helpers.import_modules import import_modules
+from Bluto.helpers.database import init_db
 
 async def start_bot():
     """Import all modules and start the bot."""
     import_modules("Bluto/modules")
+    await init_db()
     await main()
 
 if __name__ == "__main__":
