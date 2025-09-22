@@ -54,12 +54,11 @@ from Bluto.helpers.database import (
     get_next_song,
     clear_queue,
     shuffle_queue,
+    get_player_status,
+    set_player_status,
 )
 
 class BlutoPlayer:
-    def __init__(self):
-        self._groups = {}
-
     async def _update_stream(self, chat_id: int, stream: Update):
         """Callback function to handle stream updates."""
         if isinstance(stream, Update.StreamEnded):
@@ -72,18 +71,15 @@ class BlutoPlayer:
                 except Exception as e:
                     LOGGER(__name__).error(f"Failed to send message: {e}")
             else:
-                self._groups[chat_id]["status"] = "inactive"
+                await set_player_status(chat_id, "inactive")
                 await self.leave_vc(chat_id)
 
     async def join_vc(self, chat_id: int, user_id: int):
         """Join a voice chat."""
-        if chat_id in self._groups:
+        if await get_player_status(chat_id):
             return "already_in_vc"
 
-        self._groups[chat_id] = {
-            "user_id": user_id,
-            "status": "inactive",
-        }
+        await set_player_status(chat_id, "inactive")
         await pytgcalls.join_group_call(
             chat_id,
             AudioPiped(""), # A dummy stream to join
@@ -93,16 +89,16 @@ class BlutoPlayer:
 
     async def leave_vc(self, chat_id: int):
         """Leave a voice chat."""
-        if chat_id not in self._groups:
+        if not await get_player_status(chat_id):
             return "not_in_vc"
 
         await pytgcalls.leave_group_call(chat_id)
-        del self._groups[chat_id]
+        await set_player_status(chat_id, None)
         LOGGER(__name__).info(f"Left VC in chat {chat_id}")
 
     async def play(self, chat_id: int, song_path: str, is_video: bool = False):
         """Play a song."""
-        if chat_id not in self._groups:
+        if not await get_player_status(chat_id):
             return "not_in_vc"
 
         stream_quality = (
@@ -115,34 +111,34 @@ class BlutoPlayer:
         )
 
         await pytgcalls.change_stream(chat_id, stream)
-        self._groups[chat_id]["status"] = "playing"
+        await set_player_status(chat_id, "playing")
         LOGGER(__name__).info(f"Playing {'video' if is_video else 'audio'} in chat {chat_id}")
 
     async def pause(self, chat_id: int):
         """Pause playback."""
-        if chat_id not in self._groups or self._groups[chat_id]["status"] != "playing":
+        if await get_player_status(chat_id) != "playing":
             return "nothing_playing"
 
         await pytgcalls.pause_stream(chat_id)
-        self._groups[chat_id]["status"] = "paused"
+        await set_player_status(chat_id, "paused")
         LOGGER(__name__).info(f"Paused playback in chat {chat_id}")
 
     async def resume(self, chat_id: int):
         """Resume playback."""
-        if chat_id not in self._groups or self._groups[chat_id]["status"] != "paused":
+        if await get_player_status(chat_id) != "paused":
             return "nothing_paused"
 
         await pytgcalls.resume_stream(chat_id)
-        self._groups[chat_id]["status"] = "playing"
+        await set_player_status(chat_id, "playing")
         LOGGER(__name__).info(f"Resumed playback in chat {chat_id}")
 
     async def stop(self, chat_id: int):
         """Stop playback."""
-        if chat_id not in self._groups:
+        if not await get_player_status(chat_id):
             return "not_in_vc"
 
         await pytgcalls.change_stream(chat_id, AudioPiped("")) # Stop by playing silence
-        self._groups[chat_id]["status"] = "inactive"
+        await set_player_status(chat_id, "inactive")
         LOGGER(__name__).info(f"Stopped playback in chat {chat_id}")
 
     async def get_queue(self, chat_id: int):

@@ -21,3 +21,8 @@ CREATE TABLE IF NOT EXISTS queue (
     song_details JSONB NOT NULL,
     position INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS player_status (
+    chat_id BIGINT PRIMARY KEY,
+    status TEXT NOT NULL
+);

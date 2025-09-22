@@ -89,24 +89,20 @@ def get_video_info(url: str):
             return None
 
 
-def download_song(url: str):
-    """Download a song from a URL."""
-    from Bluto.config import AUDIO_FORMAT
+def get_song_stream(url: str):
+    """Get the stream URL for a song."""
     ydl_opts = {
         'format': 'bestaudio/best',
-        'outtmpl': '%(title)s.%(ext)s',
         'noplaylist': True,
         'quiet': True,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': AUDIO_FORMAT,
-            'preferredquality': '192',
-        }],
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            info = ydl.extract_info(url, download=True)
-            return ydl.prepare_filename(info)
+            info = ydl.extract_info(url, download=False)
+            return {
+                "url": info["url"],
+                "title": info.get("title", "Unknown Title"),
+            }
         except Exception as e:
-            print(f"Failed to download song: {e}")
+            print(f"Failed to get song stream: {e}")
             return None

@@ -33,7 +33,7 @@ import requests
 from io import BytesIO
 import os
 
-def generate_thumbnail(title: str, thumbnail_url: str, duration: int, requested_by: str):
+def generate_thumbnail(title: str, thumbnail_url: str, duration: int, requested_by: str, current_time: int = 0):
     """Generate a 'Now Playing' thumbnail."""
     try:
         # Create thumbnails directory if it doesn't exist
@@ -69,6 +69,12 @@ def generate_thumbnail(title: str, thumbnail_url: str, duration: int, requested_
 
         # Add requested by
         draw.text((20, img.height - 90), f"Requested by: {requested_by}", font=font, fill="white")
+
+        # Seek bar
+        bar_width = img.width - 40
+        progress = (current_time / duration) * bar_width if duration > 0 else 0
+        draw.rectangle([20, img.height - 30, 20 + bar_width, img.height - 25], fill="gray")
+        draw.rectangle([20, img.height - 30, 20 + progress, img.height - 25], fill="white")
 
         # Save the image
         path = f"thumbnails/thumb_{title}.png"

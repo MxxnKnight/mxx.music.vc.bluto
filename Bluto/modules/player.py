@@ -35,6 +35,7 @@ from pyrogram.types import (
     InlineKeyboardButton,
     CallbackQuery,
 )
+from typing import Union
 
 from Bluto.bot import app
 from Bluto.config import BOT_USERNAME, LOG_GROUP_ID, LOG_TOPIC_ID
@@ -245,13 +246,20 @@ async def resume_command(client: Client, message: Message):
 
 @app.on_message(filters.command(["skip", f"skip@{BOT_USERNAME}"]))
 @admin_only
-async def skip_command(client: Client, message: Message):
+async def skip_command(client: Client, update: Union[Message, CallbackQuery]):
     """Handle the /skip command."""
-    if not bluto_player.get_queue(message.chat.id):
-        return await message.reply_text("The queue is empty.")
+    chat_id = update.message.chat.id if isinstance(update, CallbackQuery) else update.chat.id
+    if not await bluto_player.get_queue(chat_id):
+        if isinstance(update, Message):
+            return await update.reply_text("The queue is empty.")
+        else:
+            return await update.answer("The queue is empty.", show_alert=True)
 
-    await bluto_player.stop(message.chat.id)
-    await message.reply_text("Skipped to the next song.")
+    await bluto_player.stop(chat_id)
+    if isinstance(update, Message):
+        await update.reply_text("Skipped to the next song.")
+    else:
+        await update.answer("Skipped to the next song.", show_alert=True)
 
 
 @app.on_message(filters.command(["end", "stop", f"end@{BOT_USERNAME}", f"stop@{BOT_USERNAME}"]))
@@ -266,11 +274,11 @@ async def end_command(client: Client, message: Message):
 @app.on_message(filters.command(["queue", f"queue@{BOT_USERNAME}"]))
 async def queue_command(client: Client, message: Message):
     """Handle the /queue command."""
-    queue = bluto_player.get_queue(message.chat.id)
+    queue = await bluto_player.get_queue(message.chat.id)
     if not queue:
         return await message.reply_text("The queue is empty.")
 
-    queue_list = "\n".join([f"{i+1}. {song['title']}" for i, song in enumerate(queue)])
+    queue_list = "\n".join([f"{i+1}. {song['song_details']['title']}" for i, song in enumerate(queue)])
     await message.reply_text(f"**Queue:**\n{queue_list}")
 
 
@@ -278,7 +286,7 @@ async def queue_command(client: Client, message: Message):
 @admin_only
 async def clear_queue_command(client: Client, message: Message):
     """Handle the /clearqueue command."""
-    result = bluto_player.clear_queue(message.chat.id)
+    result = await bluto_player.clear_queue(message.chat.id)
     if result == "queue_cleared":
         await message.reply_text("Queue cleared.")
     else:
@@ -290,7 +298,7 @@ async def clear_queue_command(client: Client, message: Message):
 @is_banned
 async def shuffle_command(client: Client, message: Message):
     """Handle the /shuffle command."""
-    result = bluto_player.shuffle_queue(message.chat.id)
+    result = await bluto_player.shuffle_queue(message.chat.id)
     if result == "queue_shuffled":
         await message.reply_text("Queue shuffled.")
     else:
@@ -325,11 +333,18 @@ async def resume_callback(client: Client, callback_query: CallbackQuery):
 @admin_only
 async def skip_callback(client: Client, callback_query: CallbackQuery):
     """Handle the skip callback query."""
-    if not bluto_player.get_queue(callback_query.message.chat.id):
+    if not await bluto_player.get_queue(callback_query.message.chat.id):
         return await callback_query.answer("The queue is empty.")
 
     await bluto_player.stop(callback_query.message.chat.id)
     await callback_query.answer("Skipped to the next song.")
+    next_song = await bluto_player.get_next_song(callback_query.message.chat.id)
+    if next_song:
+        await bluto_player.play(
+            callback_query.message.chat.id,
+            next_song["song_details"]["url"],
+            is_video=next_song["song_details"]["is_video"],
+        )
 
 
 @app.on_callback_query(filters.regex(f"^{STOP_CALLBACK}$"))

@@ -153,3 +153,21 @@ async def shuffle_queue(chat_id: int):
 async def remove_from_queue(song_id: int):
     """Remove a song from the queue."""
     await pool.execute("DELETE FROM queue WHERE id = $1", song_id)
+
+
+async def get_player_status(chat_id: int):
+    """Get the player status for a chat."""
+    return await pool.fetchval("SELECT status FROM player_status WHERE chat_id = $1", chat_id)
+
+
+async def set_player_status(chat_id: int, status: str):
+    """Set the player status for a chat."""
+    if status:
+        await pool.execute(
+            "INSERT INTO player_status (chat_id, status) VALUES ($1, $2) "
+            "ON CONFLICT (chat_id) DO UPDATE SET status = $2",
+            chat_id,
+            status,
+        )
+    else:
+        await pool.execute("DELETE FROM player_status WHERE chat_id = $1", chat_id)

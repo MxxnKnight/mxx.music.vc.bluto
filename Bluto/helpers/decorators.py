@@ -36,10 +36,21 @@ from Bluto.config import OWNER_ID, SUDO_USERS
 
 def owner_only(func):
     @wraps(func)
-    async def wrapper(client: Client, message: Message):
-        if message.from_user.id != OWNER_ID:
-            return await message.reply_text("This command is for the owner only.")
-        return await func(client, message)
+    async def wrapper(client: Client, update):
+        if isinstance(update, Message):
+            user = update.from_user
+        elif isinstance(update, CallbackQuery):
+            user = update.from_user
+        else:
+            return
+
+        if user.id != OWNER_ID:
+            if isinstance(update, Message):
+                await update.reply_text("This command is for the owner only.")
+            elif isinstance(update, CallbackQuery):
+                await update.answer("This command is for the owner only.", show_alert=True)
+            return
+        return await func(client, update)
     return wrapper
 
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -74,38 +85,68 @@ def admin_only(func):
 
 def is_banned(func):
     @wraps(func)
-    async def wrapper(client: Client, message: Message):
-        if await is_user_banned(message.from_user.id):
-            return await message.reply_text("You are banned from using this bot.")
-        return await func(client, message)
+    async def wrapper(client: Client, update):
+        if isinstance(update, Message):
+            user = update.from_user
+        elif isinstance(update, CallbackQuery):
+            user = update.from_user
+        else:
+            return
+
+        if await is_user_banned(user.id):
+            if isinstance(update, Message):
+                await update.reply_text("You are banned from using this bot.")
+            elif isinstance(update, CallbackQuery):
+                await update.answer("You are banned from using this bot.", show_alert=True)
+            return
+        return await func(client, update)
     return wrapper
 
 
 def force_subscribe(func):
     @wraps(func)
-    async def wrapper(client: Client, message: Message):
+    async def wrapper(client: Client, update):
         if not FORCE_SUB_CHANNEL:
-            return await func(client, message)
+            return await func(client, update)
+
+        if isinstance(update, Message):
+            user = update.from_user
+        elif isinstance(update, CallbackQuery):
+            user = update.from_user
+        else:
+            return
+
         try:
-            member = await client.get_chat_member(FORCE_SUB_CHANNEL, message.from_user.id)
+            member = await client.get_chat_member(FORCE_SUB_CHANNEL, user.id)
             if member.status in ["kicked", "left"]:
-                await message.reply_text(
-                    "You must join my updates channel to use me.",
-                    reply_markup=InlineKeyboardMarkup(
-                        [
+                if isinstance(update, Message):
+                    await update.reply_text(
+                        "You must join my updates channel to use me.",
+                        reply_markup=InlineKeyboardMarkup(
                             [
-                                InlineKeyboardButton(
-                                    "Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}"
-                                )
+                                [
+                                    InlineKeyboardButton(
+                                        "Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}"
+                                    )
+                                ]
                             ]
-                        ]
-                    ),
-                )
+                        ),
+                    )
+                elif isinstance(update, CallbackQuery):
+                    await update.answer(
+                        "You must join my updates channel to use me.", show_alert=True
+                    )
                 return
         except Exception:
-            await message.reply_text(
-                "Something went wrong. Make sure I am an admin in the force subscribe channel."
-            )
+            if isinstance(update, Message):
+                await update.reply_text(
+                    "Something went wrong. Make sure I am an admin in the force subscribe channel."
+                )
+            elif isinstance(update, CallbackQuery):
+                await update.answer(
+                    "Something went wrong. Make sure I am an admin in the force subscribe channel.",
+                    show_alert=True,
+                )
             return
-        return await func(client, message)
+        return await func(client, update)
     return wrapper

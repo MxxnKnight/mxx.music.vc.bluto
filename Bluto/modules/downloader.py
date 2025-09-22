@@ -47,7 +47,9 @@ from Bluto.helpers.database import (
     get_song_request,
     delete_song_request,
 )
-from Bluto.helpers.youtube import download_song, get_video_info
+from Bluto.helpers.youtube import get_song_stream, get_video_info
+import aiohttp
+from io import BytesIO
 
 
 @app.on_message(filters.command("song"))
@@ -96,23 +98,51 @@ async def song_command(client: Client, message: Message):
         status_message = await message.reply_text(
             "Downloading your song, please wait..."
         )
-        song_path = download_song(query)
+        song_stream = get_song_stream(query)
 
-        if not song_path:
+        if not song_stream:
             return await status_message.edit_text("Could not download the song.")
 
-        await message.reply_audio(audio=song_path)
-        await client.send_message(
-            LOG_GROUP_ID,
-            f"**Download Log**\n\n"
-            f"**User:** {message.from_user.mention}\n"
-            f"**Username:** @{message.from_user.username}\n"
-            f"**User ID:** `{message.from_user.id}`\n"
-            f"**Song:** {os.path.basename(song_path)}",
-            message_thread_id=LOG_TOPIC_ID,
-        )
-        os.remove(song_path)
-        await status_message.delete()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(song_stream["url"]) as resp:
+                if resp.status == 200:
+                    audio_buffer = BytesIO(await resp.read())
+                    audio_buffer.name = f"{song_stream['title']}.mp3"
+                    await message.reply_audio(audio=audio_buffer)
+                    await client.send_message(
+                        LOG_GROUP_ID,
+                        f"**Download Log**\n\n"
+                        f"**User:** {message.from_user.mention}\n"
+                        f"**Username:** @{message.from_user.username}\n"
+                        f"**User ID:** `{message.from_user.id}`\n"
+                        f"**Song:** {song_stream['title']}",
+                        message_thread_id=LOG_TOPIC_ID,
+                    )
+                    await status_message.delete()
+                else:
+                    await status_message.edit_text("Could not download the song.")
+
+
+async def send_song(client: Client, user_id: int, song_request: dict):
+    """Download and send the song."""
+    status_message = await client.send_message(
+        user_id, "Downloading your song, please wait..."
+    )
+    song_stream = get_song_stream(song_request["query"])
+
+    if not song_stream:
+        return await status_message.edit_text("Could not download the song.")
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(song_stream["url"]) as resp:
+            if resp.status == 200:
+                audio_buffer = BytesIO(await resp.read())
+                audio_buffer.name = f"{song_stream['title']}.mp3"
+                await client.send_audio(user_id, audio=audio_buffer)
+                await status_message.delete()
+                await delete_song_request(song_request["request_id"])
+            else:
+                await status_message.edit_text("Could not download the song.")
 
 
 @app.on_callback_query(filters.regex("^get_song_"))
@@ -163,17 +193,7 @@ async def get_song_callback(client: Client, callback_query: CallbackQuery):
             f"Something went wrong while checking your subscription: {e}",
         )
 
-    status_message = await client.send_message(
-        callback_query.from_user.id, "Downloading your song, please wait..."
-    )
-    song_path = download_song(song_request["query"])
-
-    if not song_path:
-        return await status_message.edit_text("Could not download the song.")
-
-    await client.send_audio(callback_query.from_user.id, audio=song_path)
-    await status_message.delete()
-    await delete_song_request(request_id)
+    await send_song(client, callback_query.from_user.id, song_request)
 
 
 @app.on_callback_query(filters.regex("^recheck_song_"))
@@ -207,14 +227,4 @@ async def recheck_song_subscription(client: Client, callback_query: CallbackQuer
         )
 
     await callback_query.message.delete()
-    status_message = await client.send_message(
-        callback_query.from_user.id, "Downloading your song, please wait..."
-    )
-    song_path = download_song(song_request["query"])
-
-    if not song_path:
-        return await status_message.edit_text("Could not download the song.")
-
-    await client.send_audio(callback_query.from_user.id, audio=song_path)
-    await status_message.delete()
-    await delete_song_request(request_id)
+    await send_song(client, callback_query.from_user.id, song_request)
