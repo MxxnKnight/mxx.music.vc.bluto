@@ -1,0 +1,38 @@
+name: Run Bluto Music Bot (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run the bot
+        run: python -m Bluto
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OWNER_ID: ${{ secrets.OWNER_ID }}
+          LOG_GROUP_ID: ${{ secrets.LOG_GROUP_ID }}
+          LOG_TOPIC_ID: ${{ secrets.LOG_TOPIC_ID }}
+          SUDO_USERS: ${{ secrets.SUDO_USERS }}
+          BOT_USERNAME: ${{ secrets.BOT_USERNAME }}
+          SUPPORT_CHANNEL: ${{ secrets.SUPPORT_CHANNEL }}
+          SUPPORT_GROUP: ${{ secrets.SUPPORT_GROUP }}
+          FORCE_SUB_CHANNEL: ${{ secrets.FORCE_SUB_CHANNEL }}
+          AUDIO_FORMAT: ${{ secrets.AUDIO_FORMAT }}
