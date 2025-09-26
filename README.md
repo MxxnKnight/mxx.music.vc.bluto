@@ -47,6 +47,19 @@ FORCE_SUB_CHANNEL= # The username of the force subscribe channel (without the @)
 AUDIO_FORMAT= # The audio format for downloaded songs (e.g., mp3, m4a, flac), defaults to mp3
 ```
 
+### Deploy to Sevalla
+
+1.  Click the button below to deploy the bot to Sevalla.
+
+    [![Deploy to Sevalla](https://www.sevalla.com/button.svg)](https://app.sevalla.com/apps/new/template?template=https://github.com/Mxx-x/Bluto)
+
+2.  After clicking the button, you will be redirected to Sevalla to complete the deployment. You will need to:
+    *   Connect your GitHub account.
+    *   Choose a name for your application.
+    *   Select a data center region.
+    *   Configure the required environment variables as listed in the [Prerequisites](#prerequisites) section.
+3.  You will also need to set up a PostgreSQL database on Sevalla and add the `DATABASE_URL` environment variable to your application.
+
 ### Deploy with Docker
 
 1.  Clone the repository:
