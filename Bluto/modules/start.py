@@ -125,7 +125,6 @@ async def help_page(client: Client, callback_query: CallbackQuery):
         "**Bluto Music Bot Help**\n\n"
         "**User Commands:**\n"
         "**/play <song name or link>** - Plays a song from YouTube, Spotify, or YouTube Music.\n"
-        "**/song <song name or link>** - Downloads a song. In groups with the feature enabled, it provides a private link to get the song.\n"
         "**/queue** - Shows the list of songs in the queue.\n\n"
         "**Admin Commands:**\n"
         "**/playnow <song name or link>** - Plays a song immediately, without adding it to the queue.\n"
@@ -137,8 +136,7 @@ async def help_page(client: Client, callback_query: CallbackQuery):
         "**/shuffle** - Shuffles the queue.\n"
         "**/ban <user>** - Bans a user from using the bot.\n"
         "**/unban <user>** - Unbans a user.\n"
-        "**/warn <user>** - Warns a user.\n"
-        "**/songstatus <group_id>** - Enables or disables the advanced song download feature for a group.\n",
+        "**/warn <user>** - Warns a user.\n",
         reply_markup=help_keyboard,
     )
 
